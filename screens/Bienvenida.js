@@ -1,51 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, Button } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
+import { styles } from '../styles/generalStyles';
 
-export default function Bienvenida({navigation}) {
-    const [inputText, setInputText] = useState('');
+export default function Bienvenida({ navigation }) {
+    const [edad, setEdad] = useState('');
 
     function handleButtonPress() {
-        navigation.navigate('FelizCumple', { userText: inputText });
+        navigation.navigate('FelizCumple', { userText: edad });
     };
+
+    function determinateButtonClasses(){
+        if(edad.trim() === ''){
+            console.log('Desabilitado', [styles.button, styles.buttonDisabled])
+            return [styles.button, styles.buttonDisabled];
+        } else {
+            console.log('Habilitado', [styles.button, styles.buttonEnabled])
+            return [styles.button, styles.buttonEnabled];
+        }
+    }
 
     return (
         <View style={styles.container} >
-            <Text style={styles.text}>
+            <Text style={[styles.title, styles.textColor]}>
                 ¿Cuántos años cumples?
             </Text>
             <TextInput
-                placeholder="Escribe algo aquí..."
-                value={inputText}
-                onChangeText={text => setInputText(text)}
+                placeholder="18..."
+                placeholderTextColor={'#b9b9b9'}
+                value={edad}
+                onChangeText={text => setEdad(text)}
+                style={[styles.textColor, styles.input]}
+                keyboardType='numeric'
+                maxLength={3}
             />
-            <Button title='Festejar!' onPress={handleButtonPress}/>
+            <TouchableOpacity style={determinateButtonClasses()} onPress={handleButtonPress} disabled={edad.trim() === ''}>
+                <Text style={[styles.buttonText, styles.textColor]}>Festejar!</Text>
+            </TouchableOpacity>
+
         </View >
     )
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20
-    },
-    text: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 5,
-        marginBottom: 10,
-    },
-    buttonText: {
-        marginLeft: 8,
-        fontSize: 18,
-        color: '#000',
-    },
-});
