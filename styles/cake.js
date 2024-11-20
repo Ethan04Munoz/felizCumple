@@ -1,0 +1,77 @@
+import { StyleSheet } from "react-native";
+
+export const styles = StyleSheet.create({
+    cake: {
+        width: '80%',
+        position: 'relative',
+        marginTop: 50,
+        alignSelf: 'center',
+    },
+    candles: {
+        position: 'absolute',
+        top: 0,
+        left: '20%',
+        width: '60%',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: 10,
+        rowGap: 20,
+        alignContent: 'flex-start',
+    },
+    candle: {
+        width: 5,
+        height: 20,
+        backgroundColor: 'yellow',
+        borderRadius: 3,
+        position: 'relative',
+        zIndex: 4,
+    },
+    candleFlame: {
+        position: 'absolute',
+        top: -10,
+        left: '50%',
+        transform: [{ translateX: -2 }],
+        width: 4,
+        height: 6,
+        backgroundColor: 'red',
+        borderRadius: 50,
+    },
+    layer: {
+        width: 280,
+        height: 60,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        position: 'relative',
+    },
+    top: {
+        backgroundColor: '#ff6666',
+        zIndex: 3,
+        position: 'relative',
+        marginTop: -5,
+    },
+    top1: {
+        borderTopLeftRadius: 50,
+        borderTopRightRadius: 50,
+    },
+    top2: {
+        borderBottomLeftRadius: 50,
+        borderBottomRightRadius: 50,
+    },
+    middle: {
+        backgroundColor: '#cc3333',
+        zIndex: 2,
+        position: 'relative',
+        borderBottomLeftRadius: 50,
+        borderBottomRightRadius: 50,
+        marginTop: -45,
+    },
+    bottom: {
+        backgroundColor: '#ff6666',
+        zIndex: 1,
+        position: 'relative',
+        borderBottomLeftRadius: 50,
+        borderBottomRightRadius: 50,
+        marginTop: -45,
+    },
+});
