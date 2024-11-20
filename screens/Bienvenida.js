@@ -7,7 +7,7 @@ export default function Bienvenida({ navigation }) {
     const [edad, setEdad] = useState('');
 
     function handleButtonPress() {
-        navigation.navigate('FelizCumple', { userText: edad });
+        navigation.navigate('FelizCumple', { edad: edad });
     };
 
     function determinateButtonClasses(){
