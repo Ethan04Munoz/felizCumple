@@ -3,18 +3,10 @@ import { View, Animated, StyleSheet, Platform, PermissionsAndroid } from 'react-
 import { styles } from '../styles/cake';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import * as FileSystem from 'expo-file-system';
+import SoundLevel from 'react-native-sound-level';
+import { Audio } from 'expo-av';
 
 const Cake = ({ edad }) => {
-    let path;
-    // Verifica si `documentDirectory` está disponible
-    if (FileSystem.documentDirectory != null) {
-        path = `${FileSystem.documentDirectory}recorded_audio.m4a`; // Ruta completa al archivo
-    } else {
-        console.log('FileSystem.documentDirectory no está disponible');
-    }
-
-    console.log('Path generado: ', path);
-
     const flameOpacity = new Animated.Value(1);  // Valor inicial de opacidad
 
     const [flamesVisible, setFlamesVisible] = useState(true);  // Para controlar si las llamas están encendidas
@@ -49,7 +41,6 @@ const Cake = ({ edad }) => {
 
     // Función que maneja la detección del soplido
     const handleSoundDetection = async () => {
-        const audioRecorderPlayer = new AudioRecorderPlayer();
         console.log('Entro a handleSoundDetection');
 
         // Solicitar permisos de micrófono si es necesario (solo en Android)
@@ -80,27 +71,8 @@ const Cake = ({ edad }) => {
             console.log("Platform OS: ", Platform.OS);
         }
 
-        console.log('Antes de iniciar grabacion')
-        console.log('audioRecorderPlayer:', audioRecorderPlayer);
-
-        // Iniciar la grabación solo si el permiso fue concedido
-        try {
-            audioRecorderPlayer.startRecorder(path);
-            console.log("Recording started");
-
-            audioRecorderPlayer.addRecordBackListener((e) => {
-                const volume = e.metering;  // Medir el volumen del sonido
-                console.log('Volumen: ', volume);
-
-                // Si el volumen es lo suficientemente alto (umbral de soplido)
-                if (volume > 0.3) {
-                    console.log('Sonido detectado, apagando velas');
-                    blowCandles();  // Apagar las velas
-                }
-            });
-        } catch (error) {
-            console.error('Error al iniciar la grabación:', error);
-        }
+        console.log('Antes de iniciar el sonido')
+        // Inicia la grabación
     };
 
     useEffect(() => {
