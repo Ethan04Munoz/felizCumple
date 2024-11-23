@@ -1,28 +1,66 @@
 import React, { useEffect, useState } from 'react';
-import { View, Animated, StyleSheet, Platform, PermissionsAndroid } from 'react-native';
+import { View, Animated, Text, Platform, PermissionsAndroid, Alert } from 'react-native';
 import { styles } from '../styles/cake';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import * as FileSystem from 'expo-file-system';
-import SoundLevel from 'react-native-sound-level';
 import { Audio } from 'expo-av';
 
 const Cake = ({ edad }) => {
-    const flameOpacity = new Animated.Value(1);  // Valor inicial de opacidad
+    const flameOpacity = new Animated.Value(0.8);  // Valor inicial de opacidad
 
     const [flamesVisible, setFlamesVisible] = useState(true);  // Para controlar si las llamas están encendidas
+    const [micPermission, setMicPermission] = useState(false); // Para controlar el permiso del micrófono
+
+    const [recording, setRecording] = useState();
+    const [permissionResponse, requestPermission] = Audio.usePermissions();
+
+    async function startRecording() {
+        try {
+            if (permissionResponse.status !== 'granted') {
+                console.log('Requesting permission..');
+                await requestPermission();
+            }
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: true,
+                playsInSilentModeIOS: true,
+            });
+
+            console.log('Starting recording..');
+            const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY
+            );
+            setRecording(recording);
+            console.log('Recording started', recording);
+        } catch (err) {
+            console.error('Failed to start recording', err);
+        }
+    }
+
+    async function stopRecording() {
+        console.log('Stopping recording..');
+        setRecording(undefined);
+        await recording.stopAndUnloadAsync();
+        await Audio.setAudioModeAsync(
+            {
+                allowsRecordingIOS: false,
+            }
+        );
+        const uri = recording.getURI();
+        console.log('Recording stopped and stored at', uri);
+    }
+
+    // Umbral de volumen para detectar el soplido
+    const volumeThreshold = -1;
 
     // Iniciar la animación de parpadeo
     const startFlicker = () => {
         Animated.loop(
             Animated.sequence([
                 Animated.timing(flameOpacity, {
-                    toValue: 1,
+                    toValue: 0.8,
                     duration: 500,
                     useNativeDriver: true,
                 }),
                 Animated.timing(flameOpacity, {
-                    toValue: 0.5,
-                    duration: 500,
+                    toValue: 0.4,
+                    duration: 800,
                     useNativeDriver: true,
                 }),
             ])
@@ -34,59 +72,90 @@ const Cake = ({ edad }) => {
         setFlamesVisible(false);  // Apaga las velas
         Animated.timing(flameOpacity, {
             toValue: 0,
-            duration: 500,
+            duration: 900,
             useNativeDriver: true,
         }).start();
     };
 
     // Función que maneja la detección del soplido
     const handleSoundDetection = async () => {
-        console.log('Entro a handleSoundDetection');
-
-        // Solicitar permisos de micrófono si es necesario (solo en Android)
-        if (Platform.OS === 'android') {
-            try {
-                const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-                    {
-                        title: 'Microphone Permission',
-                        message: 'We need access to your microphone to detect the blow.',
-                        buttonNeutral: 'Ask Me Later',
-                        buttonNegative: 'Cancel',
-                        buttonPositive: 'OK',
-                    }
-                );
-
-                if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                    console.log('Permission to record audio denied');
-                    return;
-                }
-                if (granted == PermissionsAndroid.RESULTS.GRANTED) {
-                    console.log('Permisos concedidos');
-                }
-            } catch (err) {
-                console.warn(err);
-            }
-        } else {
-            console.log("Platform OS: ", Platform.OS);
+        if (!micPermission) {
+            console.log('Esperando permisos de micrófono...');
+            return;
         }
+        console.log('Iniciando detección de sonido...');
+        try {
+            console.log('Antes de iniciar deteccion');
+            await startRecording();
+            const checkVolume = setInterval(async () => {
+                const status = await recording.getStatusAsync();
+                console.log('Nivel de volumen:', status.metering);
 
-        console.log('Antes de iniciar el sonido')
-        // Inicia la grabación
+                if (status.metering >= volumeThreshold) {
+                    console.log('¡Soplo detectado!');
+                    blowCandles(); // Apaga las velas
+                    clearInterval(checkVolume); // Detén el monitoreo
+                    await stopRecording(); // Detén la grabación
+                }
+            }, 200); // Verifica el nivel de volumen cada 200 ms
+        } catch (err) {
+            console.error('Error al detectar el sonido:', err);
+        }
     };
 
+    // Solicitar permisos de micrófono cuando se monte el componente
     useEffect(() => {
-        console.log('UseEffect en Cake.js')
-        startFlicker(); // Iniciar la animación de las llamas
-        handleSoundDetection(); // Comienza a detectar el sonido del micrófono
+        const requestMicPermission = async () => {
+            if (Platform.OS === 'android') {
+                try {
+                    console.log('Solicitando permisos para el micrófono...');
+                    const granted = await PermissionsAndroid.request(
+                        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+                        {
+                            title: 'Permiso de micrófono',
+                            message: 'Necesitamos acceso a tu micrófono , por favor.',
+                            buttonNeutral: 'Pregúntame luego',
+                            buttonNegative: 'Cancelar',
+                            buttonPositive: 'Aceptar',
+                        }
+                    );
+
+                    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                        console.log('Permisos concedidos');
+                        setMicPermission(true);
+                    } else {
+                        console.log('Permiso para grabar audio denegado');
+                        Alert.alert('Permiso Denegado', 'No podemos acceder al micrófono sin tu permiso.');
+                    }
+                } catch (err) {
+                    console.warn('Error al solicitar permisos:', err);
+                    Alert.alert('Error', 'Hubo un problema al solicitar los permisos. Intenta nuevamente.');
+                }
+            } else {
+                console.log('No es Android, concediendo permisos automáticamente.');
+                setMicPermission(true); 
+            }
+        };
+
+        requestMicPermission();
     }, []);
+
+    useEffect(() => {
+        if (micPermission) {
+            console.log('Permiso concedido, iniciando animación y detección de sonido');
+            startFlicker(); // Iniciar la animación de las llamas
+            handleSoundDetection(); 
+        } else {
+            console.log('Esperando para obtener permisos...');
+        }
+    }, [micPermission, permissionResponse, recording]);
 
     // Crear un arreglo de velas basado en la edad
     const candles = Array.from({ length: edad }, (_, index) => (
         <View key={index} style={styles.candle}>
             {flamesVisible && (
                 <Animated.View
-                    style={[styles.candleFlame, { opacity: flameOpacity }]} // Aplicando la animación de opacidad
+                    style={[styles.candleFlame, { opacity: flameOpacity }]}
                 />
             )}
         </View>
@@ -95,7 +164,7 @@ const Cake = ({ edad }) => {
     return (
         <View style={styles.cake}>
             <View style={styles.candles}>
-                {candles} {/* Renderiza las velas basadas en la edad */}
+                {candles}
             </View>
 
             <View style={[styles.layer, styles.top, styles.top1]}></View>
@@ -104,8 +173,8 @@ const Cake = ({ edad }) => {
             <View style={[styles.layer, styles.middle]}></View>
             <View style={[styles.layer, styles.bottom]}></View>
             <View style={[styles.layer, styles.bottom]}></View>
-            {!flamesVisible && <Text style={styles.spoiledText}>¡Las velas se apagaron!</Text>}
         </View>
     );
 };
+
 export default Cake;
