@@ -9,10 +9,15 @@ const Cake = ({ edad }) => {
     const [flamesVisible, setFlamesVisible] = useState(true);  // Para controlar si las llamas están encendidas
     const [micPermission, setMicPermission] = useState(false); // Para controlar el permiso del micrófono
 
-    const [recording, setRecording] = useState();
+    const [recording, setRecording] = useState(null);
     const [permissionResponse, requestPermission] = Audio.usePermissions();
 
     async function startRecording() {
+        if (recording) {
+            console.log("Ya hay una grabación activa. Esperando a que termine.");
+            return;
+        }
+    
         try {
             if (permissionResponse.status !== 'granted') {
                 console.log('Requesting permission..');
@@ -34,6 +39,11 @@ const Cake = ({ edad }) => {
     }
 
     async function stopRecording() {
+        if (!recording) {
+            console.log('No hay grabación activa para detener.');
+            return;
+        }
+
         console.log('Stopping recording..');
         setRecording(undefined);
         await recording.stopAndUnloadAsync();
@@ -141,6 +151,7 @@ const Cake = ({ edad }) => {
     }, []);
 
     useEffect(() => {
+        console.log("Valores: ", micPermission, recording)
         if (micPermission) {
             console.log('Permiso concedido, iniciando animación y detección de sonido');
             startFlicker(); // Iniciar la animación de las llamas
