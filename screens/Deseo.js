@@ -6,10 +6,10 @@ import { styles } from '../styles/generalStyles';
 export default function Deseo() {
     return (
         <View style={styles.container} >
-            <Text style={styles.text}>
+            <Text style={[styles.title, styles.textColor]}>
                 ¡Que buen deseo!
             </Text>
-            <Text style={styles.text}>
+            <Text style={[styles.title, styles.textColor]}>
                 Tu amigo Ethan te desea un feliz cumpleaños
             </Text>
         </View >

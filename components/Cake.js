@@ -3,7 +3,7 @@ import { View, Animated, Text, Platform, PermissionsAndroid, Alert } from 'react
 import { styles } from '../styles/cake';
 import { Audio } from 'expo-av';
 
-const Cake = ({ edad }) => {
+const Cake = ({ edad, navigation }) => {
     const flameOpacity = new Animated.Value(0.8);  // Valor inicial de opacidad
 
     const [flamesVisible, setFlamesVisible] = useState(true);  // Para controlar si las llamas están encendidas
@@ -85,6 +85,9 @@ const Cake = ({ edad }) => {
             duration: 900,
             useNativeDriver: true,
         }).start();
+        setTimeout(() => {
+            navigation.navigate('Deseo', { edad: edad });
+        }, 500);
     };
 
     // Función que maneja la detección del soplido
