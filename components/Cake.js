@@ -6,7 +6,9 @@ import { Audio } from 'expo-av';
 const Cake = ({ edad, navigation }) => {
     const flameOpacity = new Animated.Value(0.8);  // Valor inicial de opacidad
 
-    const [flamesVisible, setFlamesVisible] = useState(true);  // Para controlar si las llamas están encendidas
+    const [candlesState, setCandlesState] = useState(
+        Array.from({ length: edad }, () => true) // Todas las velas comienzan encendidas
+    );
     const [micPermission, setMicPermission] = useState(false); // Para controlar el permiso del micrófono
 
     const [recording, setRecording] = useState(null);
@@ -17,7 +19,7 @@ const Cake = ({ edad, navigation }) => {
             console.log("Ya hay una grabación activa. Esperando a que termine.");
             return;
         }
-    
+        console.log("Funcion startRecording llamada")
         try {
             if (permissionResponse.status !== 'granted') {
                 console.log('Requesting permission..');
@@ -77,17 +79,31 @@ const Cake = ({ edad, navigation }) => {
         ).start();
     };
 
-    // Función que simula apagar las velas
+    // Función para apagar un porcentaje aleatorio de velas
     const blowCandles = () => {
-        setFlamesVisible(false);  // Apaga las velas
-        Animated.timing(flameOpacity, {
-            toValue: 0,
-            duration: 900,
-            useNativeDriver: true,
-        }).start();
-        setTimeout(() => {
-            navigation.navigate('Deseo', { edad: edad });
-        }, 500);
+        const totalCandles = candlesState.length;
+        const percentageToTurnOff = Math.random() * 0.1 + 0.1; // Entre 10% y 20%
+        const candlesToTurnOff = Math.floor(totalCandles * percentageToTurnOff);
+
+        let candlesLeft = candlesState.map((isLit, index) => (isLit ? index : null)).filter(i => i !== null);
+
+        const selectedCandles = [];
+        for (let i = 0; i < candlesToTurnOff && candlesLeft.length > 0; i++) {
+            const randomIndex = Math.floor(Math.random() * candlesLeft.length);
+            selectedCandles.push(candlesLeft[randomIndex]);
+            candlesLeft.splice(randomIndex, 1);
+        }
+
+        setCandlesState(prevState =>
+            prevState.map((isLit, index) => (selectedCandles.includes(index) ? false : isLit))
+        );
+
+        // Revisar si quedan velas encendidas
+        if (candlesState.every(candle => !candle)) {
+            setTimeout(() => {
+                navigation.navigate('Deseo', { edad });
+            }, 500);
+        }
     };
 
     // Función que maneja la detección del soplido
@@ -110,7 +126,7 @@ const Cake = ({ edad, navigation }) => {
                     clearInterval(checkVolume); // Detén el monitoreo
                     await stopRecording(); // Detén la grabación
                 }
-            }, 200); // Verifica el nivel de volumen cada 200 ms
+            }, 400); // Verifica el nivel de volumen cada x ms
         } catch (err) {
             console.error('Error al detectar el sonido:', err);
         }
@@ -146,7 +162,7 @@ const Cake = ({ edad, navigation }) => {
                 }
             } else {
                 console.log('No es Android, concediendo permisos automáticamente.');
-                setMicPermission(true); 
+                setMicPermission(true);
             }
         };
 
@@ -154,26 +170,17 @@ const Cake = ({ edad, navigation }) => {
     }, []);
 
     useEffect(() => {
-        if (!flamesVisible) {
-            console.log("Llamas no visibles, deteniendo ejecución del efecto.");
-            return; // Detener ejecución si flamesVisible es false, pues indica que las velas estan apagadas
+        console.log("Valores: ", micPermission, candlesState)
+        if (candlesState.some(candle => candle)) {
+            startFlicker();
+            handleSoundDetection();
         }
-    
-        console.log("Valores: ", micPermission, recording);
-        if (micPermission) {
-            console.log('Permiso concedido, iniciando animación y detección de sonido');
-            startFlicker(); // Iniciar la animación de las llamas
-            handleSoundDetection(); 
-        } else {
-            console.log('Esperando para obtener permisos...');
-        }
-    }, [micPermission, permissionResponse, recording, flamesVisible]);
-    
+    }, [micPermission, recording, candlesState]);
 
-    // Crear un arreglo de velas basado en la edad
-    const candles = Array.from({ length: edad }, (_, index) => (
+    // Crear un arreglo de velas basado en el estado
+    const candles = candlesState.map((isLit, index) => (
         <View key={index} style={styles.candle}>
-            {flamesVisible && (
+            {isLit && (
                 <Animated.View
                     style={[styles.candleFlame, { opacity: flameOpacity }]}
                 />
