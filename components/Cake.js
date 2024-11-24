@@ -151,7 +151,12 @@ const Cake = ({ edad }) => {
     }, []);
 
     useEffect(() => {
-        console.log("Valores: ", micPermission, recording)
+        if (!flamesVisible) {
+            console.log("Llamas no visibles, deteniendo ejecución del efecto.");
+            return; // Detener ejecución si flamesVisible es false, pues indica que las velas estan apagadas
+        }
+    
+        console.log("Valores: ", micPermission, recording);
         if (micPermission) {
             console.log('Permiso concedido, iniciando animación y detección de sonido');
             startFlicker(); // Iniciar la animación de las llamas
@@ -159,7 +164,8 @@ const Cake = ({ edad }) => {
         } else {
             console.log('Esperando para obtener permisos...');
         }
-    }, [micPermission, permissionResponse, recording]);
+    }, [micPermission, permissionResponse, recording, flamesVisible]);
+    
 
     // Crear un arreglo de velas basado en la edad
     const candles = Array.from({ length: edad }, (_, index) => (
