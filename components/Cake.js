@@ -65,12 +65,12 @@ const Cake = ({ edad, navigation }) => {
             Animated.sequence([
                 Animated.timing(flameOpacity, {
                     toValue: 0.8,
-                    duration: 500,
+                    duration: 600,
                     useNativeDriver: true,
                 }),
                 Animated.timing(flameOpacity, {
                     toValue: 0.4,
-                    duration: 800,
+                    duration: 600,
                     useNativeDriver: true,
                 }),
             ])
