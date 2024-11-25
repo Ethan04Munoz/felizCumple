@@ -47,16 +47,17 @@ const Cake = ({ edad, navigation }) => {
         }
 
         console.log('Stopping recording..');
-        setRecording(undefined);
-        await recording.stopAndUnloadAsync();
-        await Audio.setAudioModeAsync(
-            {
-                allowsRecordingIOS: false,
-            }
-        );
-        const uri = recording.getURI();
-        console.log('Recording stopped and stored at', uri);
+        try {
+            await recording.stopAndUnloadAsync();
+            setRecording(undefined); // Limpia el estado de grabación solo después de detenerla
+            await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+            const uri = recording.getURI();
+            console.log('Recording stopped and stored at', uri);
+        } catch (err) {
+            console.error('Error al detener la grabación:', err);
+        }
     }
+
 
     // Umbral de volumen para detectar el soplido
     const volumeThreshold = -1;
@@ -97,40 +98,54 @@ const Cake = ({ edad, navigation }) => {
         setCandlesState(prevState =>
             prevState.map((isLit, index) => (selectedCandles.includes(index) ? false : isLit))
         );
+    };
 
+    useEffect(() => {
+        console.log("Candlestate: ", candlesState);
         // Revisar si quedan velas encendidas
         if (candlesState.every(candle => !candle)) {
             setTimeout(() => {
                 navigation.navigate('Deseo', { edad });
             }, 500);
         }
-    };
+    }, [candlesState])
 
     // Función que maneja la detección del soplido
-    const handleSoundDetection = async () => {
+    async function handleSoundDetection() {
         if (!micPermission) {
             console.log('Esperando permisos de micrófono...');
             return;
         }
         console.log('Iniciando detección de sonido...');
         try {
-            console.log('Antes de iniciar deteccion');
-            await startRecording();
+            if (!recording) {
+                await startRecording(); // Inicia la grabación si no está activa
+            }
+
             const checkVolume = setInterval(async () => {
+                if (!recording) {
+                    clearInterval(checkVolume);
+                    return;
+                }
+
                 const status = await recording.getStatusAsync();
                 console.log('Nivel de volumen:', status.metering);
 
                 if (status.metering >= volumeThreshold) {
                     console.log('¡Soplo detectado!');
                     blowCandles(); // Apaga las velas
-                    clearInterval(checkVolume); // Detén el monitoreo
-                    await stopRecording(); // Detén la grabación
+
+                    if (candlesState.every(candle => !candle)) {
+                        clearInterval(checkVolume); // Detén el monitoreo si todas las velas están apagadas
+                        await stopRecording(); // Detén la grabación final
+                    }
                 }
-            }, 400); // Verifica el nivel de volumen cada x ms
+            }, 300); // Verifica el nivel de volumen cada x ms
         } catch (err) {
             console.error('Error al detectar el sonido:', err);
         }
     };
+
 
     // Solicitar permisos de micrófono cuando se monte el componente
     useEffect(() => {
