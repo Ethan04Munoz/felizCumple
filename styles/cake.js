@@ -38,14 +38,14 @@ export const styles = StyleSheet.create({
         borderRadius: 50,
     },
     layer: {
-        width: 280,
+        width: 300,
         height: 60,
         marginLeft: 'auto',
         marginRight: 'auto',
         position: 'relative',
     },
     top: {
-        backgroundColor: '#ff6666',
+        backgroundColor: '#fab4ff',
         zIndex: 3,
         position: 'relative',
         marginTop: -5,
@@ -59,7 +59,7 @@ export const styles = StyleSheet.create({
         borderBottomRightRadius: 50,
     },
     middle: {
-        backgroundColor: '#cc3333',
+        backgroundColor: '#fde2ff',
         zIndex: 2,
         position: 'relative',
         borderBottomLeftRadius: 50,
@@ -67,7 +67,7 @@ export const styles = StyleSheet.create({
         marginTop: -45,
     },
     bottom: {
-        backgroundColor: '#ff6666',
+        backgroundColor: '#fab4ff',
         zIndex: 1,
         position: 'relative',
         borderBottomLeftRadius: 50,
