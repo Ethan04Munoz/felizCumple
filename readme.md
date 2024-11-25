@@ -8,17 +8,17 @@ Welcome to the Happy Birthday App! 🎂 This app lets you celebrate a birthday i
    - Asks for the user's age.
    - Interactive button enabled after entering a valid age.
    - Navigates to the next screen to start the celebration.
-   - ![Main screen](./readme/welcome-screen.png)
+   - ![Main screen](./readme/welcome-screen.jpeg)
 
 2. **Birthday Celebration Screen**:
    - Displays a festive birthday message.
    - Features a cake with candles based on the entered age.
    - Allows candles to be blown out using microphone sound detection.
-   - ![Birthday celebration screen](./readme/celebration-screen.png)
-   - ![Birthday celebration screen after a few candles were blown out](./readme/celebration-screen-2.png)
+   - ![Birthday celebration screen](./readme/celebration-screen.jpeg)
+   - ![Birthday celebration screen after a few candles were blown out](./readme/celebration-screen-2.jpeg)
 3. **Wish Screen**:
    - Shows a personalized birthday wish message.
-   - ![Wish screen](./readme/wish-screen.png)
+   - ![Wish screen](./readme/wish-screen.jpeg)
 
 ## 🚀 How to Use
 
@@ -74,8 +74,8 @@ Welcome to the Happy Birthday App! 🎂 This app lets you celebrate a birthday i
 
 ---
 
-- **Welcome Screen**: `./readme/welcome-screen.png`
-- **Birthday Celebration Screen**: `./readme/celebration-screen.png`
-- **Wish Screen**: `./readme/wish-screen.png`
+- **Welcome Screen**: `./readme/welcome-screen.jpeg`
+- **Birthday Celebration Screen**: `./readme/celebration-screen.jpeg`
+- **Wish Screen**: `./readme/wish-screen.jpeg`
 
 Thank you for using the Happy Birthday App! 🎉
