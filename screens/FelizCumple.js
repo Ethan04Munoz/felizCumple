@@ -4,7 +4,7 @@ import { TextInput } from 'react-native-gesture-handler';
 import { styles } from '../styles/generalStyles';
 import Cake from '../components/Cake';
 
-export default function FelizCumple({ route }) {
+export default function FelizCumple({ route, navigation }) {
     const { edad } = route.params; 
 
     return (
@@ -12,7 +12,7 @@ export default function FelizCumple({ route }) {
             <Text style={[styles.title, styles.textColor]}>
                 Feliz cumpleaños! Sopla las velas y pide un deseo
             </Text>
-            <Cake edad={edad}/>
+            <Cake edad={edad} navigation={navigation}/>
         </View >
     )
 };
