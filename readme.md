@@ -70,7 +70,7 @@ Welcome to the Happy Birthday App! 🎂 This app lets you celebrate a birthday i
 
 - Enhance the accuracy of sound detection.
 - Add more animations and festive sounds.
-- Allow personalized birthday messages.
+- Improve the candle´s flame animation
 
 ---
 
